@@ -2,7 +2,7 @@ class APIClient {
     constructor(request, baseURL) {
         this.request = request;
         this.baseURL = baseURL;
-        this.cookies = null;
+        this.cookies = '';
     }
 
     async authenticate(username, password) {
@@ -13,8 +13,15 @@ class APIClient {
             }
         });
 
-        // Store cookies for subsequent requests
-        this.cookies = await response.headers()['set-cookie'];
+        // Aggregate cookies from set-cookie headers if provided
+        const setCookie = response.headers()['set-cookie'];
+        if (setCookie) {
+            if (Array.isArray(setCookie)) {
+                this.cookies = setCookie.map(c => c.split(';')[0]).join('; ');
+            } else {
+                this.cookies = setCookie.split(',').map(c => c.split(';')[0]).join('; ');
+            }
+        }
         return response;
     }
 

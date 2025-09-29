@@ -15,11 +15,17 @@
     "report": "playwright show-report",
     "codegen": "playwright codegen https://opensource-demo.orangehrmlive.com/"
   },
-  "keywords": ["playwright", "testing", "automation", "orangehrm"],
+  "keywords": [
+    "playwright",
+    "testing",
+    "automation",
+    "orangehrm"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@playwright/test": "^1.40.0",
+    "@playwright/test": "^1.55.1",
+    "@types/node": "^24.5.2",
     "dotenv": "^16.3.1",
     "faker": "^6.6.6"
   }
