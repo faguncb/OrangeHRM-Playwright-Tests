@@ -14,12 +14,32 @@ class APIClient {
         });
 
         // Aggregate cookies from set-cookie headers if provided
-        const setCookie = response.headers()['set-cookie'];
-        if (setCookie) {
-            if (Array.isArray(setCookie)) {
-                this.cookies = setCookie.map(c => c.split(';')[0]).join('; ');
-            } else {
-                this.cookies = setCookie.split(',').map(c => c.split(';')[0]).join('; ');
+        const setCookieHeaders = response.headersArray()
+            .filter(header => header.name.toLowerCase() === 'set-cookie')
+            .map(header => header.value.split(';')[0]);
+
+        if (setCookieHeaders.length > 0) {
+            this.cookies = setCookieHeaders.join('; ');
+        }
+
+        if (!this.cookies) {
+            const cookieHeader = response.headers()['set-cookie'];
+            if (cookieHeader) {
+                const cookieValues = Array.isArray(cookieHeader)
+                    ? cookieHeader
+                    : cookieHeader.split('\n');
+                this.cookies = cookieValues.map(c => c.split(';')[0]).join('; ');
+            }
+        }
+
+        if (response.status() === 302) {
+            const location = response.headers()['location'];
+            if (location) {
+                await this.request.get(location.startsWith('http') ? location : `${this.baseURL}${location}`, {
+                    headers: {
+                        Cookie: this.cookies,
+                    },
+                });
             }
         }
         return response;
@@ -28,7 +48,8 @@ class APIClient {
     async get(endpoint) {
         return await this.request.get(`${this.baseURL}${endpoint}`, {
             headers: {
-                'Cookie': this.cookies
+                'Cookie': this.cookies,
+                'Accept': 'application/json, text/plain, */*',
             }
         });
     }
