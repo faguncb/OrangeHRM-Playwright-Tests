@@ -7,8 +7,7 @@ Automated test suite for OrangeHRM Demo application using Playwright with Page O
 - ✅ Page Object Model (POM) design pattern
 - ✅ Frontend UI testing
 - ✅ Backend API testing
-- ✅ Cross-browser testing (Chrome, Firefox, Safari)
-- ✅ Mobile responsive testing
+- ✅ Chromium (Google Chrome) coverage
 - ✅ Parallel test execution
 - ✅ Comprehensive reporting (HTML, JSON, JUnit)
 - ✅ Screenshot and video capture on failure
