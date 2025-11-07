@@ -26,22 +26,19 @@ test.describe('Dashboard Functionality', () => {
 
     test('Navigate to Admin module', async ({ page }) => {
         await dashboardPage.navigateToModule('Admin');
-
-        const headerText = await page.locator('.oxd-topbar-header-breadcrumb h6').textContent();
+        const headerText = await dashboardPage.getBreadcrumbModule();
         expect(headerText).toContain('Admin');
     });
 
     test('Navigate to PIM module', async ({ page }) => {
         await dashboardPage.navigateToModule('PIM');
-
-        const headerText = await page.locator('.oxd-topbar-header-breadcrumb h6').textContent();
+        const headerText = await dashboardPage.getBreadcrumbModule();
         expect(headerText).toContain('PIM');
     });
 
     test('Navigate to Leave module', async ({ page }) => {
         await dashboardPage.navigateToModule('Leave');
-
-        const headerText = await page.locator('.oxd-topbar-header-breadcrumb h6').textContent();
+        const headerText = await dashboardPage.getBreadcrumbModule();
         expect(headerText).toContain('Leave');
     });
 

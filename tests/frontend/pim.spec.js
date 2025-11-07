@@ -27,22 +27,18 @@ test.describe('PIM Module Functionality', () => {
 
     test('Search for employee', async ({ page }) => {
         await pimPage.searchEmployee('Linda');
-        await page.waitForTimeout(2000);
-
         const searchResults = await pimPage.getEmployeeCount();
         expect(searchResults).toBeGreaterThanOrEqual(0);
     });
 
     test('Navigate to Add Employee page', async ({ page }) => {
         await pimPage.clickAddEmployee();
-
-        const addEmployeeTitle = await page.locator('h6').textContent();
+        const addEmployeeTitle = await page.locator('h6.oxd-text--h6').first().textContent();
         expect(addEmployeeTitle).toContain('Add Employee');
     });
 
     test('Add new employee', async ({ page }) => {
         await pimPage.clickAddEmployee();
-
         const employee = testData.employees[0];
         await pimPage.addEmployee(
             employee.firstName,
@@ -50,17 +46,15 @@ test.describe('PIM Module Functionality', () => {
             employee.lastName
         );
 
-        await page.waitForTimeout(3000);
+        await page.waitForSelector('h6:has-text("Personal Details")', { state: 'visible' });
         const personalDetailsHeader = await page.locator('h6').first().textContent();
         expect(personalDetailsHeader).toContain('Personal Details');
     });
 
     test('Reset search filters', async ({ page }) => {
         await pimPage.searchEmployee('Test');
-        await page.waitForTimeout(2000);
 
         await pimPage.resetSearch();
-        await page.waitForTimeout(2000);
 
         const employeeCount = await pimPage.getEmployeeCount();
         expect(employeeCount).toBeGreaterThan(0);
@@ -69,7 +63,7 @@ test.describe('PIM Module Functionality', () => {
     test('Sort employee list', async ({ page }) => {
         const sortArrow = await page.locator('.oxd-table-header-sort').first();
         await sortArrow.click();
-        await page.waitForTimeout(1000);
+        await page.waitForSelector('.oxd-table-header-sort .oxd-icon', { state: 'visible' });
 
         const sortIcon = await page.locator('.oxd-table-header-sort .oxd-icon').first().isVisible();
         expect(sortIcon).toBeTruthy();
