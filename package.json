@@ -10,8 +10,6 @@
     "test:frontend": "playwright test tests/frontend",
     "test:backend": "playwright test tests/backend",
     "test:chrome": "playwright test --project=chromium",
-    "test:firefox": "playwright test --project=firefox",
-    "test:webkit": "playwright test --project=webkit",
     "report": "playwright show-report",
     "codegen": "playwright codegen https://opensource-demo.orangehrmlive.com/"
   },

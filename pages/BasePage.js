@@ -12,8 +12,9 @@ class BasePage {
         return await this.page.title();
     }
 
-    async waitForElement(selector, timeout = this.timeout) {
-        await this.page.waitForSelector(selector, { timeout });
+    async waitForElement(selector, options = {}) {
+        const { timeout = this.timeout, state = 'visible' } = options;
+        await this.page.waitForSelector(selector, { timeout, state });
     }
 
     async click(selector) {

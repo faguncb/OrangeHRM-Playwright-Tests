@@ -5,11 +5,11 @@ class PIMPage extends BasePage {
         super(page);
 
         // Locators
-        this.addButton = '.oxd-button--secondary[class*="oxd-button--medium"]';
+        this.addButton = 'button:has-text("Add")';
         this.employeeNameInput = 'input[placeholder="Type for hints..."]';
-        this.employeeIdInput = '.oxd-input[class*="oxd-input--active"]';
+        this.employeeIdInput = 'input[placeholder="Type Employee Id"]';
         this.searchButton = 'button[type="submit"]';
-        this.resetButton = '.oxd-button--ghost';
+        this.resetButton = 'button:has-text("Reset")';
         this.recordsTable = '.oxd-table-body';
         this.tableRows = '.oxd-table-body .oxd-table-card';
 
@@ -24,11 +24,14 @@ class PIMPage extends BasePage {
 
     async navigateToPIM() {
         await this.navigate('/web/index.php/pim/viewEmployeeList');
-        await this.waitForLoadState();
+        await this.page.waitForURL('**/pim/viewEmployeeList**', { timeout: this.timeout });
     }
 
     async clickAddEmployee() {
-        await this.click(this.addButton);
+        await Promise.all([
+            this.page.waitForURL('**/pim/addEmployee**', { timeout: this.timeout }),
+            this.page.locator(this.addButton).click()
+        ]);
         await this.waitForElement(this.firstNameInput);
     }
 
@@ -46,19 +49,30 @@ class PIMPage extends BasePage {
     }
 
     async searchEmployee(name) {
+        await this.page.fill(this.employeeNameInput, '');
         await this.type(this.employeeNameInput, name);
-        await this.click(this.searchButton);
-        await this.waitForLoadState();
+        await Promise.all([
+            this.waitForEmployeeData(),
+            this.page.locator(this.searchButton).click()
+        ]);
     }
 
     async getEmployeeCount() {
-        await this.waitForElement(this.recordsTable);
+        await this.waitForElement(this.recordsTable, { state: 'attached' });
         return await this.getElementCount(this.tableRows);
     }
 
     async resetSearch() {
-        await this.click(this.resetButton);
-        await this.waitForLoadState();
+        await Promise.all([
+            this.waitForEmployeeData(),
+            this.page.locator(this.resetButton).click()
+        ]);
+    }
+
+    async waitForEmployeeData() {
+        await this.page.waitForResponse(response => {
+            return response.url().includes('/web/index.php/api/v2/pim/employees') && response.request().method() === 'GET';
+        }, { timeout: this.timeout }).catch(() => {});
     }
 
     async deleteEmployee(rowIndex) {

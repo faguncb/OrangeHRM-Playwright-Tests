@@ -5,22 +5,25 @@ class DashboardPage extends BasePage {
         super(page);
 
         // Locators
-        this.dashboardHeader = '.oxd-topbar-header-breadcrumb h6';
+        this.dashboardHeader = '.oxd-topbar-header-breadcrumb-module';
         this.userDropdown = '.oxd-userdropdown';
         this.logoutOption = 'a[href*="logout"]';
         this.sidebarMenu = '.oxd-sidepanel-body';
-        this.quickLaunchWidgets = '.quickLaunge';
-        this.timeAtWork = '.orangehrm-dashboard-widget[data-v-37d651f2]';
+        this.quickLaunchSection = '.orangehrm-dashboard-widget:has-text("Quick Launch")';
+        this.quickLaunchItemsLocator = '.orangehrm-dashboard-widget:has-text("Quick Launch") .oxd-text--span';
+        this.timeAtWork = '.orangehrm-dashboard-widget:has-text("Time at Work")';
 
         // Menu items
-        this.adminMenu = 'a[href*="/admin/"]';
-        this.pimMenu = 'a[href*="/pim/"]';
-        this.leaveMenu = 'a[href*="/leave/"]';
-        this.timeMenu = 'a[href*="/time/"]';
-        this.recruitmentMenu = 'a[href*="/recruitment/"]';
-        this.myInfoMenu = 'a[href*="/pim/viewMyDetails"]';
-        this.performanceMenu = 'a[href*="/performance/"]';
-        this.dashboardMenu = 'a[href*="/dashboard/"]';
+        this.moduleRoutes = {
+            'Admin': '/web/index.php/admin/viewAdminModule',
+            'PIM': '/web/index.php/pim/viewEmployeeList',
+            'Leave': '/web/index.php/leave/viewLeaveList',
+            'Time': '/web/index.php/time/viewEmployeeTimesheet',
+            'Recruitment': '/web/index.php/recruitment/viewCandidates',
+            'My Info': '/web/index.php/pim/viewMyDetails',
+            'Performance': '/web/index.php/performance/searchEvaluatePerformanceReview',
+            'Dashboard': '/web/index.php/dashboard/index'
+        };
     }
 
     async isDashboardDisplayed() {
@@ -30,19 +33,13 @@ class DashboardPage extends BasePage {
     }
 
     async navigateToModule(moduleName) {
-        const moduleMap = {
-            'Admin': this.adminMenu,
-            'PIM': this.pimMenu,
-            'Leave': this.leaveMenu,
-            'Time': this.timeMenu,
-            'Recruitment': this.recruitmentMenu,
-            'My Info': this.myInfoMenu,
-            'Performance': this.performanceMenu,
-            'Dashboard': this.dashboardMenu
-        };
-
-        await this.click(moduleMap[moduleName]);
-        await this.waitForLoadState();
+        const route = this.moduleRoutes[moduleName];
+        const menuLink = this.page.getByRole('link', { name: moduleName, exact: true }).first();
+        await menuLink.waitFor({ state: 'visible', timeout: this.timeout });
+        await Promise.all([
+            this.page.waitForURL(`**${route}**`, { timeout: this.timeout }),
+            menuLink.click()
+        ]);
     }
 
     async logout() {
@@ -51,17 +48,20 @@ class DashboardPage extends BasePage {
     }
 
     async getQuickLaunchItems() {
-        const elements = await this.page.$$('.quickLaunge .quickLinkText');
-        const items = [];
-        for (const element of elements) {
-            items.push(await element.textContent());
-        }
-        return items;
+        await this.waitForElement(this.quickLaunchSection);
+        const texts = await this.page.locator(this.quickLaunchItemsLocator).allTextContents();
+        return texts.map(text => text.trim()).filter(Boolean);
     }
 
     async getUserName() {
         await this.waitForElement(this.userDropdown);
-        return await this.getText('.oxd-userdropdown-name');
+        const name = await this.getText('.oxd-userdropdown-name');
+        return name ? name.trim() : '';
+    }
+
+    async getBreadcrumbModule() {
+        await this.waitForElement(this.dashboardHeader);
+        return (await this.getText(this.dashboardHeader)).trim();
     }
 }
 
